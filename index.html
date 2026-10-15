@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101116">
+<title>VELUBIA AI – Video Studio</title>
+<style>
+:root{color-scheme:dark;--bg:#101116;--panel:#191b24;--line:#303440;--text:#f6f7fb;--muted:#a8adbc;--accent:#a78bfa}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 -apple-system,BlinkMacSystemFont,sans-serif}
+header{padding:25px 20px;border-bottom:1px solid var(--line)}
+.brand{font-size:25px;font-weight:800;letter-spacing:1px}.brand span{color:var(--accent)}
+header p,.muted{color:var(--muted)}
+main{max-width:760px;margin:auto;padding:24px 16px 50px}
+h1{font-size:clamp(28px,7vw,42px);line-height:1.15}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;margin:20px 0}
+label{display:block;margin:16px 0 7px;font-weight:600}
+input,textarea,select{display:block;width:100%;padding:13px;border:1px solid var(--line);border-radius:10px;background:#101116;color:var(--text);font:inherit}
+textarea{min-height:105px;resize:vertical}
+button{border:0;border-radius:11px;padding:13px 17px;font:inherit;font-weight:700;cursor:pointer}
+.primary{background:var(--accent);color:#171124;width:100%;margin-top:20px}
+.secondary{background:#292c38;color:var(--text)}
+.status{margin-top:15px;color:#c4b5fd;overflow-wrap:anywhere}
+.preview{border:1px dashed #55596c;border-radius:14px;padding:24px 14px;text-align:center;background:#13151c}
+video{width:100%;max-height:420px;border-radius:12px}
+footer{text-align:center;color:var(--muted);padding:25px;font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="brand">VELUBIA <span>AI</span></div><p>Deine Ideen. Deine Videos. Deine Bühne.</p></header>
+<main>
+<h1>Dein Video-Studio</h1>
+<p class="muted">Bereite deinen nächsten Social-Media-Clip vor – direkt im Browser.</p>
+<section class="panel">
+<h2>Neues Video planen</h2>
+<form id="videoForm">
+<label for="topic">Worum soll es im Video gehen?</label>
+<textarea id="topic" required maxlength="1000" placeholder="Zum Beispiel: Werbung für meinen Friseursalon ..."></textarea>
+<label for="platform">Zielplattform</label>
+<select id="platform"><option>TikTok</option><option>YouTube Shorts</option><option>Instagram Reels</option><option>WhatsApp Status</option></select>
+<label for="style">Video-Stil</label>
+<select id="style"><option>Modern und professionell</option><option>Unterhaltsam und dynamisch</option><option>Informativ und sachlich</option><option>Werbung mit starkem Einstieg</option></select>
+<label for="duration">Gewünschte Länge</label>
+<select id="duration"><option value="15">15 Sekunden</option><option value="30">30 Sekunden</option><option value="60">60 Sekunden</option></select>
+<button class="primary" type="submit">Video-Konzept erstellen</button>
+<div id="status" class="status" role="status" aria-live="polite"></div>
+</form>
+</section>
+<section class="panel" id="result" hidden>
+<h2>Dein Video-Konzept</h2><div id="script"></div>
+<button class="secondary" id="downloadText" type="button">Konzept als Text speichern</button>
+<p class="muted">Dies ist zunächst ein Textkonzept, noch kein KI-generiertes Video.</p>
+</section>
+<section class="panel">
+<h2>Eigenes Video testen</h2><p class="muted">Wähle eine bereits vorhandene Videodatei von deinem Gerät aus und sieh sie dir an.</p>
+<label for="videoFile">Videodatei auswählen</label><input id="videoFile" type="file" accept="video/*">
+<div id="videoPreview" class="preview" style="margin-top:15px">Noch kein Video ausgewählt.</div>
+</section>
+</main>
+<footer>VELUBIA AI · Frühe Demo · Noch ohne KI-API, Kundenkonten oder Zahlungen</footer>
+<script>
+const form=document.getElementById('videoForm'),statusBox=document.getElementById('status'),result=document.getElementById('result'),scriptBox=document.getElementById('script');
+let currentText='';
+form.addEventListener('submit',function(event){
+event.preventDefault();const topic=document.getElementById('topic').value.trim();if(!topic)return;
+const platform=document.getElementById('platform').value,style=document.getElementById('style').value,seconds=Number(document.getElementById('duration').value);
+currentText=`VELUBIA AI – VIDEO-KONZEPT\n\nThema: ${topic}\nPlattform: ${platform}\nStil: ${style}\nLänge: ${seconds} Sekunden\n\nEINSTIEG\nStarte mit einer kurzen Frage oder Aussage, die zur Zielgruppe passt.\n\nHAUPTTEIL\nErkläre die wichtigste Botschaft in klaren, kurzen Sätzen. Zeige passende Szenen und gut lesbare Untertitel.\n\nABSCHLUSS\nBeende das Video mit einer passenden Handlungsaufforderung.\n\nHINWEIS\nDieses Konzept wurde lokal in der Demo erstellt. Es wurde keine externe KI aufgerufen und kein fertiges Video generiert.`;
+scriptBox.textContent=currentText;result.hidden=false;statusBox.textContent='Konzept erstellt. Du kannst es jetzt speichern.';result.scrollIntoView({behavior:'smooth',block:'start'});
+});
+document.getElementById('downloadText').addEventListener('click',function(){const blob=new Blob([currentText],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='velubia-video-konzept.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+let activeUrl=null;
+document.getElementById('videoFile').addEventListener('change',function(event){const file=event.target.files&&event.target.files[0],box=document.getElementById('videoPreview');if(activeUrl)URL.revokeObjectURL(activeUrl);activeUrl=null;box.replaceChildren();if(!file){box.textContent='Noch kein Video ausgewählt.';return;}if(!file.type.startsWith('video/')){box.textContent='Bitte wähle eine Videodatei aus.';return;}activeUrl=URL.createObjectURL(file);const player=document.createElement('video');player.src=activeUrl;player.controls=true;player.playsInline=true;box.appendChild(player);});
+</script>
+</body>
+</html>
